@@ -14,5 +14,5 @@ LINKs
   * Which districts or communities have the lowest reported crime rates? Which community is the safest? 
 
 ## Data Preparation
-I gathered all the data used in this task from the (Chicago Data Portal)[https://data.cityofchicago.org]. This analysis is based on data set [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data) I've applied a filter on the site to download data ranging from January 1, 2020, at 12:00:00 AM to December 31, 2024, at 11:45:00 PM. The mapping of the area was pulled from [chicago Community areas](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/chicago-Community-areas/m39i-3ntz). 
+I gathered all the data used in this task from the [Chicago Data Portal](https://data.cityofchicago.org). This analysis is based on data set [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data) I've applied a filter on the site to download data ranging from January 1, 2020, at 12:00:00 AM to December 31, 2024, at 11:45:00 PM. The mapping of the area was pulled from [chicago Community areas](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/chicago-Community-areas/m39i-3ntz). 
 
