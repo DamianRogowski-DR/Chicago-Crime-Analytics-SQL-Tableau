@@ -14,5 +14,141 @@ LINKs
   * Which districts or communities have the lowest reported crime rates? Which community is the safest? 
 
 ## Data Preparation
-I gathered all the data used in this task from the [Chicago Data Portal](https://data.cityofchicago.org). This analysis is based on data set [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data) I've applied a filter on the site to download data ranging from January 1, 2020, at 12:00:00 AM to December 31, 2024, at 11:45:00 PM. The mapping of the area was pulled from [chicago Community areas](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/chicago-Community-areas/m39i-3ntz). 
+I gathered all the data used in this task from the [Chicago Data Portal](https://data.cityofchicago.org). This analysis is based on data set [Crimes - 2001 to Present](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data), I've applied a filter on the site to download data ranging from January 1, 2020, at 12:00:00 AM to December 31, 2024, at 11:45:00 PM. The visualization of Chicago communities utilized mapping data from [chicago Community areas](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/chicago-Community-areas/m39i-3ntz). 
+
+## Data Processing 
+Prior to preparing the data for dashboard input, I conducted a data validation to confirm its integrity and completeness. A key aspect of this validation was checking for duplicate 'case_number' entries. 
+```
+WITH case_number_count AS
+
+(
+SELECT 
+case_number, 
+count(*) AS count_of_cases
+FROM public.crimes
+GROUP BY case_number
+)
+
+SELECT
+cnc.case_number, 
+cnc.count_of_cases
+FROM case_number_count AS cnc
+WHERE count_of_cases > 1
+GROUP BY 
+cnc.case_number,
+cnc.count_of_cases
+ORDER BY 
+cnc.count_of_cases DESC;
+
+```
+As duplicates were found, the analysis was subsequently performed using the DISTINCT count of 'case_number' values.
+
+To investigate the origin of these duplicates, I cross-referenced the data with an [Arrest](https://data.cityofchicago.org/Public-Safety/Arrests/dpt3-jri9/about_data) dataset, specifically looking at whether cases conclude upon an arrest. 
+```
+SELECT
+    c.case_number,
+    a.arrest_date
+FROM
+    public.crimes AS c
+INNER JOIN
+    public.arrests AS a ON c.case_number = a.case_number
+WHERE
+    c.case_number IN 
+	(
+        SELECT
+            case_number
+        FROM
+            public.crimes
+        GROUP BY
+            case_number
+        HAVING
+            COUNT(*) > 2
+    );
+
+```
+
+The presence of duplicate case numbers appears to stem from scenarios such as repeated crime reporting.
+
+## Data Analysis
+At thi stage, I used SQL to pre-calculate the input for my visualisation. To keep the results accountable, I have done three main things:
+
+1. Following my latest discovery, I made sure that I was counting distinct values.
+
+2. I generated months within the query to ensure that the percentage change from one month to the next would not skip any months in which a specific crime type did not appear.
+
+3. I have made sure that each community will be analysed separately. This will make filtering by community areas possible and improve the overall accuracy of the analysis.
+
+By incorporating several advanced features for robust data manipulation, I managed to create a very complex query based on common table expressions, scalar queries and joins. Functions such as DATE_TRUNC, COALESCE and LAG were also used. I made sure that the values to be calculated would not cause any errors and successfully handled potential issues such as NULL values or division by zero. The whole query with my comments below:
+
+```
+WITH all_months_by_type_community AS (
+    -- Generate all possible months for each community_area and primary_type
+    SELECT
+        ca.community_area,
+        pt.primary_type,
+        DATE_TRUNC('month', gs.month_start) AS crime_month
+	-- Used DISTINCT to build a complete "matrix" of all possible crime types across all community areas, without generating redundant intermediate rows.
+    FROM (SELECT DISTINCT community_area FROM crimes) AS ca
+    CROSS JOIN (SELECT DISTINCT primary_type FROM crimes) AS pt 
+    CROSS JOIN GENERATE_SERIES(
+        (SELECT MIN(DATE_TRUNC('month', date)) FROM crimes),
+        (SELECT MAX(DATE_TRUNC('month', date)) FROM crimes),
+        '1 month'::interval
+    ) AS gs(month_start)
+),
+monthly_crime_counts_with_zeros AS (
+	-- Count the number of crimes committed in a month 
+    SELECT
+        amm.community_area,
+        amm.primary_type,
+        amm.crime_month,
+		-- Used COALESCE to ensure that any month-type-area combination that had no crimes reported will show a month_crime_count of 0 instead of NULL 
+        COALESCE(COUNT(DISTINCT c.case_number), 0) AS month_crime_count
+    FROM
+        all_months_by_type_community amm
+    LEFT JOIN
+        crimes c ON amm.community_area = c.community_area
+                 AND amm.primary_type = c.primary_type
+                 AND amm.crime_month = DATE_TRUNC('month', c.date)
+    GROUP BY
+        amm.community_area,
+        amm.primary_type,
+        amm.crime_month
+),
+crime_counts_minus_one AS (
+    SELECT
+        community_area,
+        primary_type,
+        crime_month,
+        month_crime_count,
+		-- Used window function that allows to access data from a previous row
+        LAG(month_crime_count, 1) OVER (PARTITION BY community_area, primary_type ORDER BY crime_month) AS previous_month_crime_count
+    FROM
+        monthly_crime_counts_with_zeros
+)
+-- Month-over-month percentage change in crime counts
+SELECT
+    community_area,
+    primary_type,
+    crime_month,
+    month_crime_count,
+    previous_month_crime_count,
+	-- Handling potential issues like NULL values or division by zero.
+    CASE
+        WHEN previous_month_crime_count IS NULL THEN NULL
+        WHEN previous_month_crime_count = 0 THEN NULL
+        ELSE round(((month_crime_count - previous_month_crime_count)::NUMERIC / previous_month_crime_count) * 100,2)
+    END AS percentage_change
+FROM
+    crime_counts_minus_one
+ORDER BY
+    community_area,
+    primary_type,
+    crime_month ASC;
+    
+```
+
+
+
+
 
