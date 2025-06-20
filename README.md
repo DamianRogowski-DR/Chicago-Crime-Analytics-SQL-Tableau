@@ -1,15 +1,15 @@
 # chicago_crime_analytics
-### A tool to identify trends in the "City of the Big Shoulders".
+### A tool to identify crime trends in the "City of the Big Shoulders".
 
 Tool used: PostgreSQL, Tableau
 
-LINKs
+[Chicago Crime Analytics - Tableau](https://public.tableau.com/app/profile/damian.rogowski/viz/ChicagoCrimeAnalytics_17501438440230/Dashboard1)
 
 ## Business case evaluation
 
 * Business Problem: The Chicago Chief of Police is having trouble tracking and monitoring crime trends in his city. Although the data is well gathered and stored, asking data specialists for a report on crime rates for a specific community or area is ineffective and time-consuming. They need a data analytics solution that will gather useful information in a clear, uncomplicated way, making it possible to conduct ad hoc analysis and uncover valuable patterns and trends.
-* My solution: To help Chief and his colleagues gather valuable insights that are important for city safety, I plan to use my SQL and data visualisation skills. SQL will enable me to build a precise query that tailors the data to showcase valuable trends and numbers. The data visualisation tool I have chosen, Tableau, will help me present this data in a clear and approachable way to help officers instantly spot patterns in the dataset. The dashboard will be designed to support filtering the data by the three main aspects: Community or district of the city, type of crime and year. The questions that are important for this task are as follows:
-  * Have there been any significant increases or decreases in specific crime types compared to the previous year or month? If so, by what percentage?
+* My solution: To help Chief and his colleagues gather valuable insights that are important for city safety, I plan to use my SQL and data visualisation skills. SQL will enable me to build a precise query that tailors the data to showcase valuable trends and numbers. The data visualisation tool I have chosen, Tableau, will help me present this data in a clear and approachable way to help officers instantly spot patterns in the dataset. The dashboard will be designed to support filtering the data by the three main aspects: Community area of the city, type of crime and year. The questions that are important for this task are as follows:
+  * Have there been any significant increases or decreases in specific crime types compared to the previous month? If so, by what percentage?
   * Are there any discernible patterns in the seasonality of crime? For example, do certain types of crime tend to spike during particular months or seasons? What is the 'crime season' during a year?
   * Which districts or communities have the lowest reported crime rates? Which community is the safest? 
 
@@ -147,6 +147,15 @@ ORDER BY
     crime_month ASC;
     
 ```
+To facilitate data visualization, the query output was exported to CSV format using the COPY command. 
+
+## Data Visualization
+
+The visualization component of this project comprises three key elements designed to provide a foundational understanding of crime patterns: two time-series charts illustrating the monthly sum of reported crimes and the average monthly percentage change in crime, respectively, and a geospatial map of Chicago depicting crime rates across various communities.
+
+Despite a streamlined visual design, the underlying data analysis reveals significant trends and critical insights into crime patterns. Analysis of data from 2020 to 2024 indicates that overall crime incidence is highest between May and October, with three distinct peaks observed annually in March, May, and July. Furthermore, the Austin community area consistently records the highest volume of reported crimes, accumulating over 60,000 incidents within the four-year period.
+
+The interactive filters for Community Area and Crime Type enable users to perform granular analysis, allowing for the identification of crime trends within specific communities or to display overall crime rates for a particular Crime Type.
 
 
 
