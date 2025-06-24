@@ -8,7 +8,7 @@ Tool used: PostgreSQL, Tableau
 ## Business case evaluation
 
 * Business Problem: The Chicago Chief of Police is having trouble tracking and monitoring crime trends in his city. Although the data is well gathered and stored, asking data specialists for a report on crime rates for a specific community or area is ineffective and time-consuming. They need a data analytics solution that will gather useful information in a clear, uncomplicated way, making it possible to conduct ad hoc analysis and uncover valuable patterns and trends.
-* My solution: To help Chief and his colleagues gather valuable insights that are important for city safety, I plan to use my SQL and data visualisation skills. SQL will enable me to build a precise query that tailors the data to showcase valuable trends and numbers. The data visualisation tool I have chosen, Tableau, will help me present this data in a clear and approachable way to help officers instantly spot patterns in the dataset. The dashboard will be designed to support filtering the data by the three main aspects: Community area of the city, type of crime and year. The questions that are important for this task are as follows:
+* My solution: To help Chief and his colleagues gather valuable insights that are important for city safety, I plan to use my SQL and data visualisation skills. SQL will enable me to build a precise query that tailors the data to showcase valuable trends and numbers. The data visualisation tool I have chosen, Tableau, will help me present this data in a clear and approachable way to help officers instantly spot patterns in the dataset. The dashboard will be designed to support filtering the data by the three main aspects: community area of the city, type of crime and year. The questions that are important for this task are as follows:
   * Have there been any significant increases or decreases in specific crime types compared to the previous month? If so, by what percentage?
   * Are there any discernible patterns in the seasonality of crime? For example, do certain types of crime tend to spike during particular months or seasons? What is the 'crime season' during a year?
   * Which districts or communities have the lowest reported crime rates? Which community is the safest? 
@@ -41,6 +41,10 @@ ORDER BY
 cnc.count_of_cases DESC;
 
 ```
+Result:
+
+<img src="https://github.com/DamianRogowski-DR/chicago_crime_analytics/blob/main/process_querry_output/case_number_unique_check.png" width="200" height="280">
+
 As duplicates were found, the analysis was subsequently performed using the DISTINCT count of 'case_number' values.
 
 To investigate the origin of these duplicates, I cross-referenced the data with an [Arrest](https://data.cityofchicago.org/Public-Safety/Arrests/dpt3-jri9/about_data) dataset, specifically looking at whether cases conclude upon an arrest. 
@@ -66,6 +70,9 @@ WHERE
     );
 
 ```
+Result:
+
+<img src="https://github.com/DamianRogowski-DR/chicago_crime_analytics/blob/main/process_querry_output/case_number_arrest_date.png" width="200" height="280">
 
 The presence of duplicate case numbers appears to stem from scenarios such as repeated crime reporting.
 
@@ -121,7 +128,7 @@ crime_counts_minus_one AS (
         primary_type,
         crime_month,
         month_crime_count,
-		-- Used window function that allows to access data from a previous row
+	-- Used window function that allows to access data from a previous row
         LAG(month_crime_count, 1) OVER (PARTITION BY community_area, primary_type ORDER BY crime_month) AS previous_month_crime_count
     FROM
         monthly_crime_counts_with_zeros
@@ -156,6 +163,8 @@ The visualization component of this project comprises three key elements designe
 Despite a streamlined visual design, the underlying data analysis reveals significant trends and critical insights into crime patterns. Analysis of data from 2020 to 2024 indicates that overall crime incidence is highest between May and October, with three distinct peaks observed annually in March, May, and July. Furthermore, the Austin community area consistently records the highest volume of reported crimes, accumulating over 60,000 incidents within the four-year period.
 
 The interactive filters for Community Area and Crime Type enable users to perform granular analysis, allowing for the identification of crime trends within specific communities or to display overall crime rates for a particular Crime Type.
+
+You can view the final visualization [here](https://public.tableau.com/app/profile/damian.rogowski/viz/ChicagoCrimeAnalytics_17501438440230/Dashboard1)
 
 
 
