@@ -1,4 +1,4 @@
-# chicago_crime_analytics
+# Chicago Crime Analytics: SQL & Tableau
 ### A tool to identify crime trends in the "City of the Big Shoulders".
 
 Tool used: PostgreSQL, Tableau
